@@ -24,7 +24,7 @@ function FromCurrency(props) {
             <select onChange={e => props.handleEvent(e.target.value)}>
                 <option value="usd">USD</option>
                 <option value="eur">EUR</option>
-                <option value="ngn">NGN</option>
+                <option value="gbp">GBP</option>
                 <option value="jpy">JPY</option>
             </select>
         </label>
@@ -37,7 +37,7 @@ function ToCurrency(props) {
             <select onChange={e => props.handleEvent(e.target.value)}>
                 <option value="usd">USD</option>
                 <option value="eur">EUR</option>
-                <option value="ngn">NGN</option>
+                <option value="gbp">GBP</option>
                 <option value="jpy">JPY</option>
             </select>
         </label>
@@ -46,25 +46,30 @@ function ToCurrency(props) {
 
 function App() {
     const [amount, setAmount] = useState(0);
-    const [from, setFrom] = useState(null);
-    const [to, setTo] = useState(null);
+    // Setting a Base Currency (USD) is essential for a scalable conversion model.
+    const BASE_CURRENCY = "USD";
+
+    const [from, setFrom] = useState(BASE_CURRENCY);
+    const [to, setTo] = useState(BASE_CURRENCY);
 
     const handleInputAmount = amt => setAmount(Number(amt));
     const handleFromCurrency = curr => setFrom(curr);
     const handleToCurrency = curr => setTo(curr);
 
-    // Setting a Base Currency (USD) is essential for a scalable conversion model.
-    const BASE_CURRENCY = "USD";
 
     // EXCHANGE_RATES_TO_BASE: Defines how many units of a local currency equal 1 unit of the BASE_CURRENCY (USD).
     const EXCHANGE_RATES_TO_BASE = {
         USD: 1.0,
         EUR: 0.883,
-        NGN: 1443.6,
+        GBP: 0.757,
         JPY: 156.3
     };
     
-    const handleConvert = (amt, fromCur, toCur) => {
+    const handleConvert = useMemo(() => {
+        const amt = amount
+        const fromCur = from
+        const toCur = to
+
             // 1. Check for immediate conversion
             if (fromCur === toCur) {
                 return amt.toFixed(2);
@@ -79,7 +84,7 @@ function App() {
             const amountInBase = amt / fromRate;
             const convertedAmount = amountInBase * toRate;
             return convertedAmount.toFixed(2);
-        };
+        }, [amount, from, to]);
 
     return (
         <>
@@ -90,7 +95,7 @@ function App() {
                     handleEvent={handleFromCurrency}
                 />
                 <ToCurrency toCurr={to} handleEvent={handleToCurrency} />
-                <p>{handleConvert(amount, from, to)}</p>
+                <p>{`${amount}${from.toUpperCase()} = ${handleConvert}${to.toUpperCase()}`}</p>
             </section>
         </>
     );
